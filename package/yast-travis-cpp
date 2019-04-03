@@ -1,0 +1,194 @@
+#! /bin/bash
+
+# This is a CI build script for running inside the Travis builds.
+# It's designed for the YaST packages written in C++.
+
+# exit on error immediately
+set -e
+
+# all known steps in this script
+ALL_STEPS="pot, spelling, package, perl_syntax"
+
+# when adding a new step
+# 1) add it to $ALL_STEPS
+# 2) handle it in disable_all(), set_defaults(), exclude(), run_only()
+#    and dump_settings()
+# 3) run it in the "main" part
+
+function usage() {
+  echo "Usage: $0 [OPTIONS]"
+  echo
+  echo "OPTIONS:"
+  echo -e "\\t -x <step> \\t exclude the specified step"
+  echo -e "\\t -o <step> \\t run only the specified step"
+  echo -e "\\t -d        \\t enable debug mode"
+  echo -e "\\t -h        \\t print this help"
+  echo
+  echo "The known steps are: $ALL_STEPS"
+  echo
+  echo "The script analyzes the configuration files and runs the checks accordingly."
+  echo "You can manually override the autodection using the -x or -o option."
+  echo
+  echo "Options -x and -o are exclusive and cannot be used together,"
+  echo "but they can be used repeatedly to specify several steps."
+}
+
+# disable all steps
+function disable_all() {
+  # run this only once
+  if [ "$DISABLE_ALL" != "1" ]; then
+    RUN_CHECK_PERL=0
+    RUN_BUILD_PACKAGE=0
+
+    DISABLE_ALL=1
+  fi
+}
+
+# set defaults, run everything possible
+function set_defaults() {
+  # run the perl syntax check by default when there is at least one Perl file
+  if [ -n "$(find . -type f -name '*.p[ml]' -print -quit)" ]; then
+    RUN_CHECK_PERL=1
+  else
+    RUN_CHECK_PERL=0
+  fi
+
+  RUN_BUILD_PACKAGE=1
+}
+
+function exclude() {
+  if [ "$RUN_ONLY_USED" == "1" ]; then
+    echo "ERROR: Options -x -o are exclusive and cannot be used together!"
+    exit 1
+  fi
+
+  case $1 in
+    package)
+      RUN_BUILD_PACKAGE=0
+      ;;
+    perl_syntax)
+      RUN_CHECK_PERL=0
+      ;;
+    *)
+      echo "ERROR: Unknown step: '$1'"
+      echo "Known steps: $ALL_STEPS"
+      exit 1
+  esac
+  EXCLUDE_USED=1
+}
+
+function run_only() {
+  if [ "$EXCLUDE_USED" == "1" ]; then
+    echo "ERROR: Options -x -o are exclusive and cannot be used together!"
+    exit 1
+  fi
+
+  # disable the other steps
+  disable_all
+
+  case $1 in
+    package)
+      RUN_BUILD_PACKAGE=1
+      ;;
+    perl_syntax)
+      RUN_CHECK_PERL=1
+      ;;
+    *)
+      echo "ERROR: Unknown step: '$1'"
+      echo "Known steps: $ALL_STEPS"
+      exit 1
+  esac
+  RUN_ONLY_USED=1
+}
+
+function dump_settings() {
+  echo "Script configuration:"
+  echo "RUN_CHECK_PERL: $RUN_CHECK_PERL"
+  echo "RUN_BUILD_PACKAGE: $RUN_BUILD_PACKAGE"
+  echo
+}
+
+# check the syntax of the perl files
+function check_perl() {
+  # Perl allows checking the syntax only for one file at once, we need to use -n1
+  # xargs option, to speed it up run the checks in parallel (-P option).
+  # If you need to specify an additional search path use the PERL5LIB environment variable.
+  find . -type f -name '*.p[ml]' -print0 \
+    | xargs -0 -P"$(nproc)" -n1 perl -I src/modules -I /usr/share/YaST2/modules -w -c
+}
+
+# initializa the defaults and parse the command line options
+
+set_defaults
+
+while getopts ":x:o:dhy" arg; do
+  case $arg in
+    x)
+      exclude "$OPTARG"
+      ;;
+    o)
+      run_only "$OPTARG"
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    d)
+      DEBUG=1
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+# start the main script
+
+# enable debug
+if [ "$DEBUG" == "1" ]; then
+  dump_settings
+  set -x
+fi
+
+# run syntax check for the perl files
+[ "$RUN_CHECK_PERL" == "1" ] && check_perl
+
+# the rest is a package build if it is disabled then just finish now
+[ "$RUN_BUILD_PACKAGE" == "0" ] && exit 0
+
+# Build the binary package locally, use plain "rpmbuild" to make it simple.
+# "osc build" is too resource hungry (builds a complete chroot from scratch).
+# Moreover it does not work in a Docker container (it fails when trying to mount
+# /proc and /sys in the chroot).
+if [ -f utils/make_package ]; then
+  utils/make_package
+elif [ -f Makefile.repo ]; then
+  make -f Makefile.repo
+  make package
+elif [ -f Rakefile ]; then
+  rake pot
+  rake tarball > /dev/null 2>&1
+else
+  echo "ERROR: Missing Makefile.repo or Rakefile, cannot build the package"
+  exit 1
+fi
+
+if [ -d package ]; then
+  # run the osc source validator to check the .spec and .changes locally
+  (cd package && /usr/lib/obs/service/source_validator)
+fi
+
+cp package/* /usr/src/packages/SOURCES/
+# Build the binary package, if it fails try to build the package with ignored
+# deps, maybe it can work anyway...
+# (e.g. yast2-packager requires yast2_theme which is not needed in simple rpmbuild)
+rpmbuild -bb package/*.spec || rpmbuild -bb --nodeps package/*.spec
+
+# test the %pre/%post scripts by installing/updating/removing the built packages
+# ignore the dependencies to make the test easier, as a smoke test it's good enough
+rpm -iv --force --nodeps /usr/src/packages/RPMS/**/*.rpm
+rpm -Uv --force --nodeps /usr/src/packages/RPMS/**/*.rpm
+# get the plain package names and remove all packages at once
+mapfile -t packages < <(rpm -q --qf '%{NAME}\n' -p /usr/src/packages/RPMS/*/*.rpm)
+rpm -ev --nodeps "${packages[@]}"
