@@ -27,7 +27,7 @@ trigger the rebuild in the OBS just like for the other regular packages.
 
 This image is based on the latest openSUSE Tumbleweed image, additionally
 it contains the packages needed for running the tests for YaST packages written
-in Ruby. It is possible to install additional packagers if needed, see the
+in C++. It is possible to install additional packagers if needed, see the
 [Examples](#examples) section below.
 
 ## Using the Image in the Other Projects
