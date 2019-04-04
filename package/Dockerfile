@@ -55,7 +55,6 @@ RUN zypper --non-interactive install --no-recommends \
   which \
   yast2-core-devel \
   yast2-devtools \
-  yast2-devtools \
   yast2-ycp-ui-bindings-devel \
   && zypper clean --all \
   && rm -rf /usr/lib*/ruby/gems/*/cache/ \
