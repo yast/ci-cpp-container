@@ -7,7 +7,7 @@
 set -e
 
 # all known steps in this script
-ALL_STEPS="pot, spelling, package, perl_syntax"
+ALL_STEPS="pot, package, perl_syntax"
 
 # when adding a new step
 # 1) add it to $ALL_STEPS
