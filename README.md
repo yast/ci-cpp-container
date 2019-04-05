@@ -1,4 +1,4 @@
-# The YaST Ruby Testing Image
+# The YaST C++ Testing Image
 
 [![Build Status](https://travis-ci.org/yast/ci-cpp-container.svg?branch=master)](https://travis-ci.org/yast/ci-cpp-container)
 
