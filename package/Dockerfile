@@ -64,8 +64,12 @@ RUN zypper --non-interactive install --no-recommends \
   && find /usr/share/locale -name "*.mo" -delete
 
 
-COPY yast-travis-cpp /usr/local/bin/
-RUN chmod a+x /usr/local/bin/yast-travis-cpp
+COPY yast-ci-cpp /usr/local/bin/
+RUN chmod a+x /usr/local/bin/yast-ci-cpp
+
+# just a backward compatible symlink, should be removed in the future...
+RUN ln -s yast-ci-cpp /usr/local/bin/yast-travis-cpp
+
 ENV LC_ALL=en_US.UTF-8
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
