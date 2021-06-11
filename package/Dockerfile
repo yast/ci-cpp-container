@@ -1,6 +1,8 @@
 
 #!BuildTag: yast-cpp
 
+# This actually is registry.opensuse.org/yast/head/images/opensuse/tumbleweed:latest
+# when building in OBS YaST:Head!
 FROM opensuse/tumbleweed
 
 # do not install the files marked as documentation (use "rpm --excludedocs")
