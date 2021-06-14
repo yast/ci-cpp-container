@@ -40,49 +40,43 @@ The workflow is:
 - If the code needs additional packages install them using the `zypper install`
   command from the local `Dockerfile`. If the package can be used by more modules
   you can add it into the base Docker image here.
-- Run the `yast-travis-cpp` script. (Optionally you can use the `-x` and `-o`
+- Run the `yast-ci-cpp` script. (Optionally you can use the `-x` and `-o`
   options to split the work into several smaller tasks and run them in parallel,
   see the [yast2-storage-ng example](
   https://github.com/yast/yast-storage-ng/blob/master/.travis.yml).)
 
 ## Examples
 
-### `Dockerfile` example
+### GitHub Action Example
 
-```Dockerfile
-FROM registry.opensuse.org/yast/head/containers/yast-cpp
-
-# optionally install additional packages if needed:
-# RUN zypper --non-interactive install --no-recommends \
-#  libxml2-devel \
-#  yast2-core-devel
-
-# copy the sources into the image
-COPY . /usr/src/app
-```
-
-### `.travis.yml` Example
+Save as `.github/workflows/ci.yml` file in your Git repository:
 
 ```yaml
-sudo: required
-language: bash
-services:
-  - docker
+# See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions
 
-before_install:
-  - docker build -t yast-foo-image .
-  # list the installed packages (just for easier debugging)
-  - docker run --rm -it yast-foo-image rpm -qa | sort
+name: CI
 
-script:
-  # the "yast-travis-cpp" script is included in the base yast-ruby image
-  # see https://github.com/yast/ci-cpp-container/blob/master/package/yast-travis-cpp
-  - docker run -it --rm -e TRAVIS=1 -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" yast-foo-image yast-travis-cpp
+on: [push, pull_request]
+
+jobs:
+  Package:
+    runs-on: ubuntu-latest
+    container: registry.opensuse.org/yast/head/containers/yast-cpp:latest
+
+    steps:
+
+    - name: Git Checkout
+      uses: actions/checkout@v2
+
+    - name: Prepare System
+      run: |
+        zypper --non-interactive in --no-recommends \
+          needed-package1 \
+          needed-package2
+
+    - name: Package Build
+      run:  yast-ci-cpp
 ```
-
-(Replace `foo` with your package name to avoid collisions with the other packages
-when running the same commands locally.)
-
 
 ## Building the Image Locally
 
