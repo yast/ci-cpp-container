@@ -23,7 +23,6 @@ RUN zypper --non-interactive install --no-recommends \
   bison \
   boost-devel \
   brp-check-suse \
-  brp-extract-appdata \
   build \
   cmake \
   dejagnu \
