@@ -157,6 +157,16 @@ fi
 # the rest is a package build if it is disabled then just finish now
 [ "$RUN_BUILD_PACKAGE" == "0" ] && exit 0
 
+# ensure the files are owned by the current (root) user,
+# git would fail if the owner is different like when running in GitHub Actions
+# ("git clone" is called in a VM as a non-root user, but when running an action
+# in a Docker container it runs as root which is the Docker default)
+# https://github.blog/2022-04-18-highlights-from-git-2-36/
+# https://github.blog/2022-04-12-git-security-vulnerability-announced/
+if [ "$UID" == "0" ]; then
+  chown -c "$UID" .
+fi
+
 # Build the binary package locally, use plain "rpmbuild" to make it simple.
 # "osc build" is too resource hungry (builds a complete chroot from scratch).
 # Moreover it does not work in a Docker container (it fails when trying to mount
