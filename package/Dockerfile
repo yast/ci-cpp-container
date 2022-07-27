@@ -32,6 +32,7 @@ RUN zypper --non-interactive install --no-recommends \
   flex \
   gcc-c++ \
   git \
+  glibc-locale \
   grep \
   hwinfo-devel \
   libtool \

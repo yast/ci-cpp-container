@@ -164,7 +164,7 @@ fi
 # https://github.blog/2022-04-18-highlights-from-git-2-36/
 # https://github.blog/2022-04-12-git-security-vulnerability-announced/
 if [ "$UID" == "0" ]; then
-  chown -c "$UID" .
+  chown -R -c "$UID" .
 fi
 
 # Build the binary package locally, use plain "rpmbuild" to make it simple.
