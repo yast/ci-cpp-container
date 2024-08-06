@@ -41,14 +41,14 @@ RUN zypper --non-interactive install --no-recommends \
   openSUSE-release-ftp \
   rpm-build \
   ruby-devel \
-  "rubygem(ruby:3.2.0:fast_gettext)" \
-  "rubygem(ruby:3.2.0:gettext)" \
-  "rubygem(ruby:3.2.0:raspell)" \
-  "rubygem(ruby:3.2.0:rspec)" \
-  "rubygem(ruby:3.2.0:rubocop)" \
-  "rubygem(ruby:3.2.0:simplecov)" \
-  "rubygem(ruby:3.2.0:yard)" \
-  "rubygem(ruby:3.2.0:yast-rake)" \
+  "rubygem(ruby:3.3.0:fast_gettext)" \
+  "rubygem(ruby:3.3.0:gettext)" \
+  "rubygem(ruby:3.3.0:raspell)" \
+  "rubygem(ruby:3.3.0:rspec)" \
+  "rubygem(ruby:3.3.0:rubocop)" \
+  "rubygem(ruby:3.3.0:simplecov)" \
+  "rubygem(ruby:3.3.0:yard)" \
+  "rubygem(ruby:3.3.0:yast-rake)" \
   screen \
   sgml-skel \
   ShellCheck \
