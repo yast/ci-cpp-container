@@ -41,14 +41,14 @@ RUN zypper --non-interactive install --no-recommends \
   openSUSE-release-ftp \
   rpm-build \
   ruby-devel \
-  "rubygem(ruby:3.2.0:fast_gettext)" \
-  "rubygem(ruby:3.2.0:gettext)" \
-  "rubygem(ruby:3.2.0:raspell)" \
-  "rubygem(ruby:3.2.0:rspec)" \
-  "rubygem(ruby:3.2.0:rubocop)" \
-  "rubygem(ruby:3.2.0:simplecov)" \
-  "rubygem(ruby:3.2.0:yard)" \
-  "rubygem(ruby:3.2.0:yast-rake)" \
+  "rubygem(ruby:3.3.0:fast_gettext)" \
+  "rubygem(ruby:3.3.0:gettext)" \
+  "rubygem(ruby:3.3.0:raspell)" \
+  "rubygem(ruby:3.3.0:rspec)" \
+  "rubygem(ruby:3.3.0:rubocop)" \
+  "rubygem(ruby:3.3.0:simplecov)" \
+  "rubygem(ruby:3.3.0:yard)" \
+  "rubygem(ruby:3.3.0:yast-rake)" \
   screen \
   sgml-skel \
   ShellCheck \
@@ -60,7 +60,7 @@ RUN zypper --non-interactive install --no-recommends \
   && zypper clean --all \
   && rm -rf /usr/lib*/ruby/gems/*/cache/ \
   && rm -rf /usr/share/doc/ \
-  && rpm -e --nodeps kbd kbd-legacy \
+  && rpm -e --nodeps kbd \
   && find /usr/lib/locale/* -maxdepth 1 | grep -v -E "(en_US|cs_CZ|es_ES|de_DE|C.utf8)" | xargs rm -rf \
   && find /usr/share/locale -name "*.mo" -delete
 
