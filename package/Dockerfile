@@ -60,7 +60,7 @@ RUN zypper --non-interactive install --no-recommends \
   && zypper clean --all \
   && rm -rf /usr/lib*/ruby/gems/*/cache/ \
   && rm -rf /usr/share/doc/ \
-  && rpm -e --nodeps kbd kbd-legacy \
+  && rpm -e --nodeps kbd \
   && find /usr/lib/locale/* -maxdepth 1 | grep -v -E "(en_US|cs_CZ|es_ES|de_DE|C.utf8)" | xargs rm -rf \
   && find /usr/share/locale -name "*.mo" -delete
 
