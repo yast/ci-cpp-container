@@ -1,17 +1,17 @@
 # The YaST C++ Testing Image
 
 [![CI](https://github.com/yast/ci-cpp-container/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/yast/ci-cpp-container/actions/workflows/ci.yml)
+[![OBS](https://github.com/yast/ci-cpp-container/actions/workflows/submit.yml/badge.svg)](https://github.com/yast/ci-cpp-container/actions/workflows/submit.yml)
 
 This git repository contains the configuration used to build the docker
-image used for [TravisCI](https://travis-ci.org/).
+image used for [GitHub Actions](https://docs.github.com/en/actions).
 The resulting docker image is available at https://registry.opensuse.org/.
 
 ## Automatic Rebuilds
 
 - The image is rebuilt whenever a commit it pushed to the `master` branch.
-- The [yast-ci-cpp-container-master](
-  https://ci.opensuse.org/view/Yast/job/yast-ci-cpp-container-master/)
-  Jenkins job copies the configuration to the [YaST:Head/ci-cpp-container](
+- The [submit.yml](./.github/workflows/submit.yml)
+  GitHub Action commits the configuration to the [YaST:Head/ci-cpp-container](
   https://build.opensuse.org/package/show/YaST:Head/ci-cpp-container)
   OBS project
 - The OBS tracks the dependencies and rebuilds the image if any dependant package
@@ -22,7 +22,6 @@ The resulting docker image is available at https://registry.opensuse.org/.
 If for some reason the automatic rebuild do not work or it failed you can
 trigger the rebuild in the OBS just like for the other regular packages.
 
-
 ## The Image Content
 
 This image is based on the latest openSUSE Tumbleweed image, additionally
@@ -32,7 +31,7 @@ in C++. It is possible to install additional packagers if needed, see the
 
 ## Using the Image in the Other Projects
 
-The image contains the `yast-travis-cpp` script which runs all the checks and tests.
+The image contains the `yast-ci-cpp` script which runs all the checks and tests.
 
 The workflow is:
 
@@ -41,9 +40,7 @@ The workflow is:
   command from the local `Dockerfile`. If the package can be used by more modules
   you can add it into the base Docker image here.
 - Run the `yast-ci-cpp` script. (Optionally you can use the `-x` and `-o`
-  options to split the work into several smaller tasks and run them in parallel,
-  see the [yast2-storage-ng example](
-  https://github.com/yast/yast-storage-ng/blob/master/.travis.yml).)
+  options to split the work into several smaller tasks and run them in parallel.)
 
 ## Examples
 
@@ -66,7 +63,7 @@ jobs:
     steps:
 
     - name: Git Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Prepare System
       run: |

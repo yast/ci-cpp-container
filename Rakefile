@@ -11,6 +11,6 @@ end
 # do not create a tarball, this project builds a Docker container
 Rake::Task["tarball"].clear_actions
 
-# building at Jenkins does not work for some reason, disable it for now
-Rake::Task["osc:build"].clear if ENV["JENKINS_HOME"]
+# building at Jenkins/GitHub Actions does not work, disable it for now
+Rake::Task["osc:build"].clear if ENV["JENKINS_HOME"] || ENV["CI"]
 
