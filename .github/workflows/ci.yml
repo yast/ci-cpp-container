@@ -12,7 +12,7 @@ jobs:
     steps:
 
     - name: Git Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     # the OBS build actually uses the image from YaST:Head, patch the config
     # to use the same base image also in the GitHub Action
